@@ -1,2 +1,11 @@
-xarray
-zarr
+name: swissai
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - matplotlib
+  - pip
+  - xarray
+  - zarr
+  - pip:
+    - scores
