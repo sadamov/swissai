@@ -2,6 +2,7 @@ name: swissai
 channels:
   - conda-forge
 dependencies:
+  - cartopy
   - python=3.12
   - matplotlib
   - pip
