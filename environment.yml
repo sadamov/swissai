@@ -3,9 +3,10 @@ channels:
   - conda-forge
 dependencies:
   - cartopy
-  - python=3.12
+  - jinja2
   - matplotlib
   - pip
+  - python=3.12
   - xarray
   - zarr
   - pip:
