@@ -27,3 +27,5 @@ parameters for the verification of your dataset. Always run **Chapter One**
 first. This chapter initializes necessary variables and has a strict return API
 (dims and sizes). After running **Chapter One**, you can execute any of the
 following chapters directly.
+
+The Notebook is optimized and developed for dark mode. Some plots might not lookas intended in light mode.
