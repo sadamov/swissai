@@ -1,5 +1,6 @@
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sadamov/swissai/main?filepath=verification.ipynb)
-[![nbviewer](https://img.shields.io/badge/view-nbviewer-orange)](https://nbviewer.jupyter.org/github/sadamov/swissai/blob/43f315618c26d9cf55b8cbb7d203e79f360cb247/verification.ipynb)
+[![nbviewer](https://img.shields.io/badge/view-nbviewer-orange)](https://nbviewer.jupyter.org/github/sadamov/swissai/blob/main/verification.ipynb)
+
 
 ## README
 
