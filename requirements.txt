@@ -1,0 +1,5 @@
+cartopy
+jinja2
+matplotlib
+xarray
+zarr
