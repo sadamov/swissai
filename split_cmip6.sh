@@ -154,7 +154,7 @@ while IFS= read -r file; do
     # -f nc4 forces NetCDF4 output format
     # -O enables overwriting of existing files
     # splityear splits into yearly files with automatic YYYY suffix
-    cdo -O -P ${OMP_NUM_THREADS} -f nc4 splityear "${file}" "${out_dir}/${base_name}_%y"
+    cdo -O -P ${OMP_NUM_THREADS} -f nc4 splityear "${file}" "${out_dir}/${base_name}_"
     echo "----------------------------------------"
 done <"$multi_year_files"
 
