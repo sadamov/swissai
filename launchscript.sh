@@ -7,7 +7,6 @@
 #SBATCH --partition=normal
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=288
 
 # Set environment variables - all PATHS need rw(x) permissions
 # CMIP6_PATH: path to the original CMIP6 data
@@ -24,9 +23,6 @@ export SCRIPT_PATH="/iopsstor/scratch/cscs/sadamov/pyprojects_data/swissai/split
 if [ ! -d "${OUT_PATH}" ]; then
     mkdir -p ${OUT_PATH}
 fi
-
-export OMP_NUM_THREADS=$((SLURM_CPUS_PER_TASK / 4))
-echo "Using $OMP_NUM_THREADS threads for CDO"
 
 # Run with SLURM CPU binding
 srun --cpu-bind=cores --container-writable --environment=/users/sadamov/pyprojects/swissai/swissai_container.toml bash ${SCRIPT_PATH}
