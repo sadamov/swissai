@@ -25,7 +25,7 @@ if [ ! -d "${OUT_PATH}" ]; then
     mkdir -p ${OUT_PATH}
 fi
 
-export OMP_NUM_THREADS=$((SLURM_CPUS_PER_TASK / 2))
+export OMP_NUM_THREADS=$((SLURM_CPUS_PER_TASK / 4))
 echo "Using $OMP_NUM_THREADS threads for CDO"
 
 # Run with SLURM CPU binding
