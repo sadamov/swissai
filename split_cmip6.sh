@@ -9,11 +9,11 @@
 # 5. Validates date consistency and reports anomalies
 
 # Dependency check for CDO (Climate Data Operators)
-# if ! command -v cdo &>/dev/null; then
-#     echo "CDO is not installed. Please install it before running this script."
-#     echo "For example build a container and run 'sudo apt-get install cdo'"
-#     exit 1
-# fi
+if ! command -v cdo &>/dev/null; then
+    echo "CDO is not installed. Please install it before running this script."
+    echo "For example build a container and run 'sudo apt-get install cdo'"
+    exit 1
+fi
 
 # Initialize associative array to store duration counts
 declare -A count
@@ -75,24 +75,36 @@ extract_dates() {
 # Counter for files with significant date rounding discrepancies
 declare -i files_with_large_rounding=0
 
+# Initialize files for categorization
+one_year_files="files_1year.txt"
+multi_year_files="files_multi.txt"
+error_files="files_error.txt"
+
+# Clear any existing category files
+>"$one_year_files"
+>"$multi_year_files"
+>"$error_files"
+
 # Process each file and analyze its duration
 while read -r line; do
     result=$(extract_dates "$line")
     if [ $? -ne 0 ]; then
+        echo "$line" >>"$error_files"
         continue
     fi
 
     read start end years days_diff <<<"$result"
 
-    # Print files with a specific amount of years
-    # if [ "$years" -eq 250 ]; then
-    #     echo "File with 250 years: $line"
-    # fi
-
     count[$years]=$((${count[$years]:-0} + 1))
 
+    # Categorize files while processing
+    if [ "$years" -eq 1 ]; then
+        echo "$line" >>"$one_year_files"
+    else
+        echo "$line" >>"$multi_year_files"
+    fi
+
     # Check for significant rounding discrepancies (> 4 days)
-    # This helps identify potential filename inconsistencies
     if (($( echo "$days_diff > 4" | bc -l))); then
         echo "WARNING: Large rounding for file: $line"
         echo "Period: $start to $end"
@@ -112,8 +124,52 @@ for k in "${!count[@]}"; do
 done | sort -n
 
 # Display summary statistics
-echo "Total number of files:"
-cat files.txt | wc -l
+echo -e "\nFile categorization summary:"
+echo "Total files: $(wc -l <files.txt)"
+echo "One-year files: $(wc -l <$one_year_files)"
+echo "Multi-year files: $(wc -l <$multi_year_files)"
+echo "Files with parsing errors: $(wc -l <$error_files)"
+echo "Files with rounding > 4 days: $files_with_large_rounding"
 
-echo "Number of files with rounding > 4 days: $files_with_large_rounding"
+# Process each file from multi_year_files with CDO splityear
+echo -e "\nProcessing multi-year files with CDO..."
+echo "----------------------------------------"
 
+while IFS= read -r file; do
+    # Get the relative path structure
+    rel_path=${file#$CMIP6_PATH}
+    out_dir="${OUT_PATH}/$(dirname ${rel_path})"
+
+    # Create output directory structure
+    mkdir -p "${out_dir}"
+
+    # Get filename without extension
+    base_name=$(basename "${file}" .nc)
+
+    echo "Processing: ${file}"
+    echo "Output to: ${out_dir}"
+
+    # Use CDO to split the file by year
+    # -f nc4 forces NetCDF4 output format
+    # -O enables overwriting of existing files
+    # splityear splits into yearly files with automatic YYYY suffix
+    cdo -f nc4 splityear "${file}" "${out_dir}/${base_name}_"
+
+    # # Rename the output files to match YYYYMMDD_HHMM format
+    # for yearly_file in "${out_dir}/${base_name}"_*; do
+    #     if [[ ${yearly_file} =~ ${base_name}_([0-9]{4})\.nc$ ]]; then
+    #         year="${BASH_REMATCH[1]}"
+    #         new_name="${out_dir}/${base_name}_${year}0101_0000.nc"
+    #         mv "${yearly_file}" "${new_name}"
+    #         echo "Renamed to: ${new_name}"
+    #     fi
+    # done
+    echo "----------------------------------------"
+done <"$multi_year_files"
+
+echo "CDO processing complete"
+
+rm files.txt
+rm $one_year_files
+rm $multi_year_files
+rm $error_files

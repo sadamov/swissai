@@ -14,7 +14,7 @@
 export CMIP6_PATH="/capstor/store/cscs/swissai/a01/CMIP6/CMIP/CMCC/CMCC-CM2-HR4/historical/r1i1p1f1/"
 export OUT_PATH="${SCRATCH}/cmip6"
 export LOG_DIR="${SCRATCH}/logs"
-export SCRIPT_PATH="/users/sadamov/pyprojects/swissai/split_cmip6.sh"
+export SCRIPT_PATH="/iopsstor/scratch/cscs/sadamov/pyprojects_data/swissai/split_cmip6.sh"
 
 # Create necessary directories
 mkdir -p ${LOG_DIR}
