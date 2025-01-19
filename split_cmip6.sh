@@ -21,7 +21,6 @@ declare -A count
 # Use environment variables with defaults
 CMIP6_PATH=${CMIP6_PATH:-"/capstor/store/cscs/swissai/a01/CMIP6/CMIP/CMCC/CMCC-CM2-HR4/historical/r1i1p1f1/"}
 OUT_PATH=${OUT_PATH:-"${SCRATCH}/cmip6"}
-LOG_DIR=${LOG_DIR:-"${SCRATCH}/logs"}
 
 # Validate paths
 if [ ! -d "$CMIP6_PATH" ]; then
@@ -98,7 +97,9 @@ while read -r line; do
     count[$years]=$((${count[$years]:-0} + 1))
 
     # Categorize files while processing
-    if [ "$years" -eq 1 ]; then
+    if [ "$years" -eq 0 ]; then
+        echo "$line" >>"$error_files"  # Treat 0-year files as errors
+    elif [ "$years" -eq 1 ]; then
         echo "$line" >>"$one_year_files"
     else
         echo "$line" >>"$multi_year_files"
@@ -153,17 +154,7 @@ while IFS= read -r file; do
     # -f nc4 forces NetCDF4 output format
     # -O enables overwriting of existing files
     # splityear splits into yearly files with automatic YYYY suffix
-    cdo -f nc4 splityear "${file}" "${out_dir}/${base_name}_"
-
-    # # Rename the output files to match YYYYMMDD_HHMM format
-    # for yearly_file in "${out_dir}/${base_name}"_*; do
-    #     if [[ ${yearly_file} =~ ${base_name}_([0-9]{4})\.nc$ ]]; then
-    #         year="${BASH_REMATCH[1]}"
-    #         new_name="${out_dir}/${base_name}_${year}0101_0000.nc"
-    #         mv "${yearly_file}" "${new_name}"
-    #         echo "Renamed to: ${new_name}"
-    #     fi
-    # done
+    cdo -O -P ${OMP_NUM_THREADS} -f nc4 splityear "${file}" "${out_dir}/${base_name}_%y"
     echo "----------------------------------------"
 done <"$multi_year_files"
 

@@ -18,9 +18,8 @@ HTTP_PROXY = "http://proxy.cscs.ch:8080"
 HTTPS_PROXY = "http://proxy.cscs.ch:8080"
 CONDA_AUTO_ACTIVATE_BASE = "false"
 CONDA_DEFAULT_ENV = ""
-GOGC="off"
+GOGC = "off"
 OMP_WAIT_POLICY = "ACTIVE"
-OMP_PLACES="cores"
-OMP_PROC_BIND="close"
-
-
+OMP_PLACES = "cores"
+OMP_PROC_BIND = "close"
+OMP_MAX_ACTIVE_LEVELS = 1
