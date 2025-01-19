@@ -18,10 +18,21 @@
 # Initialize associative array to store duration counts
 declare -A count
 
-# Define paths
-CMIP6_PATH="/capstor/store/cscs/swissai/a01/CMIP6/CMIP/CMCC/"
-OUT_PATH="${SCRATCH}/cmip6"
-mkdir -p ${OUT_PATH}
+# Use environment variables with defaults
+CMIP6_PATH=${CMIP6_PATH:-"/capstor/store/cscs/swissai/a01/CMIP6/CMIP/CMCC/CMCC-CM2-HR4/historical/r1i1p1f1/"}
+OUT_PATH=${OUT_PATH:-"${SCRATCH}/cmip6"}
+LOG_DIR=${LOG_DIR:-"${SCRATCH}/logs"}
+
+# Validate paths
+if [ ! -d "$CMIP6_PATH" ]; then
+    echo "Error: CMIP6_PATH directory does not exist: $CMIP6_PATH"
+    exit 1
+fi
+
+if [ ! -d "$OUT_PATH" ]; then
+    echo "Error: OUT_PATH directory does not exist: $OUT_PATH"
+    exit 1
+fi
 
 # Extract all NetCDF files into a temporary file
 find ${CMIP6_PATH} -name "*.nc" >files.txt
@@ -102,6 +113,7 @@ done | sort -n
 
 # Display summary statistics
 echo "Total number of files:"
-wc -l files.txt
+cat files.txt | wc -l
 
 echo "Number of files with rounding > 4 days: $files_with_large_rounding"
+
