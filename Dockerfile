@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     libproj-dev \
     libgeos-dev \
     cdo \
+    netcdf-bin \
     libgomp1 \
     bc \
     && rm -rf /var/lib/apt/lists/*

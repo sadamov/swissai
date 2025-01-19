@@ -7,6 +7,9 @@
 # 3. Calculates duration in years
 # 4. Groups files by duration and provides statistics
 # 5. Validates date consistency and reports anomalies
+# 6. Categorizes files into one-year, multi-year, and error files
+# 7. Processes multi-year files with CDO to split them into yearly files
+# 8. Outputs results and statistics with identical compression settings
 
 # Dependency check for CDO (Climate Data Operators)
 if ! command -v cdo &>/dev/null; then
@@ -136,6 +139,33 @@ echo "Files with rounding > 4 days: $files_with_large_rounding"
 echo -e "\nProcessing multi-year files with CDO..."
 echo "----------------------------------------"
 
+get_nc_settings() {
+    local file="$1"
+    local settings=""
+
+    # Extract compression settings using ncdump
+    local header=$(ncdump -h -s "${file}")
+
+    # Get deflate level (look for first occurrence)
+    local deflate_level=$(echo "$header" | grep -m1 "_DeflateLevel" | grep -o "[0-9]")
+    if [ -z "$deflate_level" ]; then
+        deflate_level=0  # No compression
+    fi
+
+    # Check if shuffling is enabled
+    if echo "$header" | grep -q '_Shuffle = "true"'; then
+        settings="-z zip_${deflate_level}"
+    elif [ "$deflate_level" -gt 0 ]; then
+        # If deflate is set but shuffle not explicitly true, still use compression
+        settings="-z zip_${deflate_level}"
+    fi
+
+    # Always use NetCDF4 format and copy chunking from input
+    settings+=" -f nc4"
+
+    echo "$settings"
+}
+
 while IFS= read -r file; do
     # Get the relative path structure
     rel_path=${file#$CMIP6_PATH}
@@ -150,11 +180,17 @@ while IFS= read -r file; do
     echo "Processing: ${file}"
     echo "Output to: ${out_dir}"
 
+    # Get compression settings from input file
+    nc_settings=$(get_nc_settings "${file}")
+
+    echo "Compression settings: ${nc_settings}"
+
     # Use CDO to split the file by year
     # -f nc4 forces NetCDF4 output format
     # -O enables overwriting of existing files
     # splityear splits into yearly files with automatic YYYY suffix
-    cdo -O -P ${OMP_NUM_THREADS} -f nc4 splityear "${file}" "${out_dir}/${base_name}_"
+    cdo -O ${nc_settings} -P ${OMP_NUM_THREADS} splityear "${file}" "${out_dir}/${base_name}_"
+
     echo "----------------------------------------"
 done <"$multi_year_files"
 
