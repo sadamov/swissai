@@ -180,19 +180,37 @@ while IFS= read -r file; do
     echo "Processing: ${file}"
     echo "Output to: ${out_dir}"
 
+    # Extract start and end years from the file
+    result=$(extract_dates "$file")
+    read start_date end_date years days_diff <<<"$result"
+    start_year=${start_date:0:4}
+    end_year=${end_date:0:4}
+
+    # Check if any file for any year in the range already exists
+    existing_files=0
+    for year in $(seq $start_year $end_year); do
+        if [ -f "${out_dir}/${base_name}_${year}.nc" ]; then
+            ((existing_files++))
+        fi
+    done
+
+    if [ $existing_files -eq $((end_year - start_year + 1)) ]; then
+        echo "Skipping: All output files already exist for ${file}"
+        echo "----------------------------------------"
+        continue
+    fi
+
     # Get compression settings from input file
     nc_settings=$(get_nc_settings "${file}")
-
     echo "Compression settings: ${nc_settings}"
 
     # Use CDO to split the file by year
     # -f nc4 forces NetCDF4 output format
+    # -splityear always overwrites existing files without prompting
+    # -splityear does not act on the -P option for multi-threading
+    # as this task is considered I/O-bound
     # splityear splits into yearly files with automatic YYYY suffix
-    if cdo ${nc_settings} -P ${OMP_NUM_THREADS} splityear "${file}" "${out_dir}/${base_name}_"; then
-        echo "Successfully processed ${file}"
-    else
-        echo "Warning: Failed to process ${file} - output files may already exist"
-    fi
+    cdo ${nc_settings} splityear "${file}" "${out_dir}/${base_name}_"
     echo "----------------------------------------"
 done <"$multi_year_files"
 
