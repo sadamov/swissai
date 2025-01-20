@@ -1,5 +1,8 @@
 cartopy
+ipykernel
 jinja2
 matplotlib
+scipy
+scores
 xarray
 zarr
