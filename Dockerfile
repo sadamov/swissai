@@ -1,6 +1,6 @@
 FROM python:3.10-slim
 
-# Install system dependencies including OpenMP
+# Install system dependencies (for CMIP6 splitting)
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
@@ -8,9 +8,11 @@ RUN apt-get update && apt-get install -y \
     libproj-dev \
     libgeos-dev \
     cdo \
+    netcdf-bin \
     libgomp1 \
+    bc \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+# Install Python dependencies (for verification and plotting)
 COPY requirements.txt .
 RUN pip install -r requirements.txt
