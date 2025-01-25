@@ -2,7 +2,9 @@ cartopy
 ipykernel
 jinja2
 matplotlib
+pysteps
 scipy
+scikit-image
 scores
 xarray
 zarr
