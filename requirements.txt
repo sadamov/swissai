@@ -1,4 +1,5 @@
 cartopy
+"dask[distributed]"
 ipykernel
 jinja2
 matplotlib
