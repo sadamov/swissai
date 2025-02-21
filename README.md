@@ -50,7 +50,7 @@ Or if you are sure that all settings in parameters are correct you can also
 run the notebook directly from the CLI, here an example for Aurora:
 
 ```bash
-jupyter nbconvert --to notebook --execute verification_aurora.ipynb \
+jupyter nbconvert --to notebook --execute verification_esfm.ipynb \
     --output executed_notebook.ipynb \
     --ExecutePreprocessor.kernel_name=python3 \
     --ExecutePreprocessor.extra_arguments='["/iopsstor/scratch/cscs/sadamov/pyprojects_data/swissai/preds_20250219/aurora.zarr"]'
